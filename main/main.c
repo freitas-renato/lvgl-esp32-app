@@ -23,6 +23,8 @@
 // #include "lvgl/lvgl.h"
 #include "lvgl_helpers.h"
 
+#include "homescreen.h"
+
 
 
 #define LV_TICK_PERIOD_MS 1
@@ -31,7 +33,7 @@ static const char* TAG = "MAIN";
 
 static void lv_tick_task(void* arg);
 static void gui_task(void* arg);
-static void create_hello_world_app(void);
+static void lvgl_init_application(void);
 
 void app_main(void) {
     ESP_LOGI(TAG, "Hello world!");
@@ -53,17 +55,8 @@ void app_main(void) {
 
     ESP_LOGI(TAG, "Minimum free heap size: %d bytes\n", esp_get_minimum_free_heap_size());
 
-
     // Create LVGL task
     xTaskCreatePinnedToCore(gui_task, "GUI", 4096*2, NULL, 0, NULL, 1);
-
-    // for (int i = 10; i >= 0; i--) {
-    //     printf("Restarting in %d seconds...\n", i);
-    //     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    // }
-    // printf("Restarting now.\n");
-    // fflush(stdout);
-    // esp_restart();
 }
 
 
@@ -81,12 +74,6 @@ static void gui_task(void* arg) {
 
     // Init SPI bus
     lvgl_driver_init();
-    // // Initialize the touchpad
-    // lv_indev_drv_t indev_drv;
-    // lv_indev_drv_init(&indev_drv);
-    // indev_drv.type = LV_INDEV_TYPE_POINTER;
-    // indev_drv.read = lv_touchpad_read;
-    // lv_indev_drv_register(&indev_drv);
 
     // Allocate two framebuffers
     lv_color_t* buf1 = heap_caps_malloc(DISP_BUF_SIZE * sizeof(lv_color_t), MALLOC_CAP_DMA);
@@ -121,7 +108,7 @@ static void gui_task(void* arg) {
 
 
     // Create a basic application
-    create_hello_world_app();
+    lvgl_init_application();
 
     // Enter main loop
     for (;;) {
@@ -146,29 +133,8 @@ static void gui_task(void* arg) {
 
 
 
-static void create_hello_world_app(void) {
-    static lv_style_t screen_style;
-    lv_style_init(&screen_style);
-    lv_style_set_bg_color(&screen_style, LV_STATE_DEFAULT, lv_color_hex(0x000000));
-    lv_style_set_border_width(&screen_style, LV_STATE_DEFAULT, 0);
-    lv_style_set_border_color(&screen_style, LV_STATE_DEFAULT, lv_color_hex(0x000000));
-    lv_style_set_radius(&screen_style, LV_STATE_DEFAULT, 0);
-
-    // Create background rectangle
-    lv_obj_t* scr = lv_obj_create(lv_scr_act(), NULL);
-    lv_obj_set_size(scr, 240, 320);
-    lv_obj_add_style(scr, LV_OBJ_PART_MAIN, &screen_style);
-    lv_scr_load(scr);
-
-
-    lv_obj_t *btn = lv_btn_create(lv_scr_act(), NULL);
-    lv_obj_set_size(btn, 150, 50);
-    lv_obj_align_mid(btn, NULL, LV_ALIGN_CENTER, 0, 0);
-
-    lv_obj_t *label = lv_label_create(btn, NULL);   // label on the button
-    lv_label_set_text(label, "Hello world!");   // Set label text
-    lv_obj_align_mid(label, NULL, LV_ALIGN_CENTER, 0, 0);
-    // lv_obj_center(label);  // Center horizontally and vertically
+static void lvgl_init_application(void) {
+    homescreen_init();
 }
 
 static void lv_tick_task(void* arg) {
