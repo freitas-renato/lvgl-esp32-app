@@ -1,3 +1,1 @@
 # LVGL Test App
-
-🤫
